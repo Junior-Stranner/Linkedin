@@ -7,19 +7,19 @@ import jakarta.persistence.Id;
 
 @Entity(name = "users")
 //@Indexed(index = "users")
-public class AuthenticationUser {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String email;
     private String password;
 
-    public AuthenticationUser(String email, String password) {
+    public User(String email, String password) {
         this.email = email;
         this.password = password;
     }
 
-    public AuthenticationUser() {
+    public User() {
     }
 
     public Long getId() {
