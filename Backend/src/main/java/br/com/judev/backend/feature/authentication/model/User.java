@@ -1,9 +1,9 @@
 package br.com.judev.backend.feature.authentication.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 
 @Entity(name = "users")
 //@Indexed(index = "users")
@@ -11,7 +11,11 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @NotNull
+    @Email
+    @Column(unique = true)
     private String email;
+    @JsonIgnore
     private String password;
 
     public User(String email, String password) {

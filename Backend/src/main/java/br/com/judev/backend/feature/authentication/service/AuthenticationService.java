@@ -44,9 +44,8 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponseDTO register(AuthenticationRequestDTO registerRequest) {
-        User user = userRepository.save(new User(
-                registerRequest.email(), encoder.encode(registerRequest.password())));
 
+        User user = userRepository.save(new User(registerRequest.email(), encoder.encode(registerRequest.password())));
         String emailVerificationToken = generateEmailVerificationToken();
         String hashedToken = encoder.encode(emailVerificationToken);
 
