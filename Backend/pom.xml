@@ -53,7 +53,7 @@
             <version>42.7.2</version>
         </dependency>
 
-      <!--  <dependency>
+       <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
             <version>0.11.5</version>
@@ -66,32 +66,35 @@
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-jackson</artifactId>  or jjwt-gson if Gson is preferred -
+            <artifactId>jjwt-jackson</artifactId>  <!-- or jjwt-gson if Gson is preferred -->
             <version>0.11.5</version>
             <scope>runtime</scope>
-        </dependency>-->
+        </dependency>
+
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.3.0</version>
         </dependency>
-        <dependency>
-            <groupId>com.auth0</groupId>
-            <artifactId>java-jwt</artifactId>
-            <version>4.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-redis</artifactId>
-        </dependency>
+        <!--   <dependency>
+                  <groupId>com.auth0</groupId>
+                 <artifactId>java-jwt</artifactId>
+                 <version>4.4.0</version>
+             </dependency>-->
+          <dependency>
+              <groupId>org.springframework.data</groupId>
+              <artifactId>spring-data-redis</artifactId>
+          </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.springframework.data/spring-data-jpa -->
+          <!-- https://mvnrepository.com/artifact/org.springframework.data/spring-data-jpa -->
         <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-data-jpa</artifactId>
     </dependency>
-
-
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
