@@ -1,23 +1,42 @@
 package br.com.judev.backend.feature.authentication.utils;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import javax.crypto.SecretKey;
+import java.math.BigInteger;
+import java.security.KeyFactory;
+import java.security.spec.RSAPublicKeySpec;
+import java.util.Base64;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 
 
 @Component
 public class JwtToken {
+
     private final RestTemplate restTemplate;
+    @Value("${jwt.secret.key}")
+    private String secret;
 
     public JwtToken(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
+    public SecretKey getKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes());
+    }
 
     public String generateToken(String email) {
         return Jwts.builder()
@@ -27,6 +46,7 @@ public class JwtToken {
                 .signWith(getKey())
                 .compact();
     }
+
     public String getEmailFromToken(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -44,6 +64,7 @@ public class JwtToken {
                 .getPayload();
     }
 
+
     public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
@@ -51,4 +72,7 @@ public class JwtToken {
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
+
+
+
 }
