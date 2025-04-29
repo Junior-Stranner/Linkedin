@@ -23,8 +23,13 @@ public class AuthenticationController {
       return authenticationService.getUserByEmail("jujubaprojects@gmail.com");
     }
 
+    @PostMapping("/login")
+    public AuthenticationResponseDTO loginPage(@Valid @RequestBody AuthenticationRequestDTO loginRequest) {
+        return authenticationService.login(loginRequest);
+    }
+
     @PostMapping("/register")
-    public AuthenticationResponseDTO registerPage(@Valid @RequestBody AuthenticationRequestDTO registerRequestBody) {
-        return authenticationService.register(registerRequestBody);
+    public AuthenticationResponseDTO registerPage(@Valid @RequestBody AuthenticationRequestDTO registerRequest) {
+        return authenticationService.register(registerRequest);
     }
 }

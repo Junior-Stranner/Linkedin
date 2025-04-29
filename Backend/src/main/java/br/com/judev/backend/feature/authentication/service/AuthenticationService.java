@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
-import java.time.LocalDateTime;
 
 @Service
 public class AuthenticationService {
@@ -22,12 +21,14 @@ public class AuthenticationService {
     private final int durationInMinutes = 1;
     private final Encoder encoder;
     private final JwtToken jwtToken;
+    private final EmailService emailService;
 
 
-    public AuthenticationService(UserRepository userRepository, Encoder encoder, JwtToken jwtToken){
+    public AuthenticationService(UserRepository userRepository, Encoder encoder, JwtToken jwtToken, EmailService emailService){
         this.userRepository = userRepository;
         this.encoder = encoder;
         this.jwtToken = jwtToken;
+        this.emailService = emailService;
     }
 
     public User getUserByEmail(String email){
@@ -50,7 +51,6 @@ public class AuthenticationService {
         String emailVerificationToken = generateEmailVerificationToken();
         String hashedToken = encoder.encode(emailVerificationToken);
 
-
         userRepository.save(user);
 
         String subject = "Email Verification";
@@ -58,7 +58,24 @@ public class AuthenticationService {
                 Only one step to take full advantage of LinkedIn.
                 Enter this code to verify your email: %s. The code will expire in %s minutes.""",
                 emailVerificationToken, durationInMinutes);
+        try {
+            emailService.sendEmail(registerRequest.email(), subject, body);
+        } catch (Exception e) {
+            logger.info("Error while sending email: {}", e.getMessage());
+        }
         String authToken = jwtToken.generateToken(registerRequest.email());
         return new AuthenticationResponseDTO(authToken, "User registered successfully.");
+    }
+
+    public AuthenticationResponseDTO login(AuthenticationRequestDTO loginRequest) {
+        User user = userRepository.findByEmail(loginRequest.email())
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+
+        if (!encoder.matches(loginRequest.password(), user.getPassword())) {
+            throw new IllegalArgumentException("Password is incorrect.");
+        }
+
+        String token = jwtToken.generateToken(loginRequest.email());
+        return new AuthenticationResponseDTO(token, "Authentication succeeded");
     }
 }
