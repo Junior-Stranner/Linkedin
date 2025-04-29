@@ -1,9 +1,15 @@
-package br.com.judev.backend.security.jwt;
+package br.com.judev.backend.feature.authentication.utils;
 
-import io.jsonwebtoken.*;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import javax.crypto.SecretKey;
@@ -11,12 +17,16 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.spec.RSAPublicKeySpec;
-import java.util.*;
+import java.util.Base64;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 public class JwtService {
-
     // Chave secreta para assinar/verificar tokens (deve ser longa e segura)
-    private final String secret = "minhaChaveSuperSecretaQueDeveTerPeloMenos256Bits";
+    @Value("${jwt.secret.key}")
+    private String secret;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
