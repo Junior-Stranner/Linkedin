@@ -1,5 +1,6 @@
 package br.com.judev.backend.feature.authentication.controller;
 
+import br.com.judev.backend.dto.Response;
 import br.com.judev.backend.feature.authentication.dto.AuthenticationRequestDTO;
 import br.com.judev.backend.feature.authentication.dto.AuthenticationResponseDTO;
 import br.com.judev.backend.feature.authentication.model.User;
@@ -31,5 +32,12 @@ public class AuthenticationController {
     @PostMapping("/register")
     public AuthenticationResponseDTO registerPage(@Valid @RequestBody AuthenticationRequestDTO registerRequest) {
         return authenticationService.register(registerRequest);
+    }
+
+
+    @GetMapping("/send-email-verification-token")
+    public Response sendEmailVerificationToken(@RequestAttribute("authenticatedUser") User user) {
+        authenticationService.sendEmailVerificationToken(user.getEmail());
+        return new Response("Email verification token sent successfully.");
     }
 }

@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class AuthenticationService {
@@ -45,11 +47,36 @@ public class AuthenticationService {
         return token.toString();
     }
 
+    public void sendEmailVerificationToken(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isPresent() && !user.get().getEmailVerified()) {
+            String emailVerificationToken = generateEmailVerificationToken();
+            String hashedToken = encoder.encode(emailVerificationToken);
+            user.get().setEmailVerificationToken(hashedToken);
+            user.get().setEmailVerificationTokenExpiryDate(LocalDateTime.now().plusMinutes(durationInMinutes));
+            userRepository.save(user.get());
+            String subject = "Email Verification";
+            String body = String.format("Only one step to take full advantage of LinkedIn.\n\n"
+                            + "Enter this code to verify your email: " + "%s\n\n" + "The code will expire in " + "%s"
+                            + " minutes.",
+                    emailVerificationToken, durationInMinutes);
+            try {
+                emailService.sendEmail(email, subject, body);
+            } catch (Exception e) {
+                logger.info("Error while sending email: {}", e.getMessage());
+            }
+        } else {
+            throw new IllegalArgumentException("Email verification token failed, or email is already verified.");
+        }
+    }
+
     public AuthenticationResponseDTO register(AuthenticationRequestDTO registerRequest) {
 
         User user = userRepository.save(new User(registerRequest.email(), encoder.encode(registerRequest.password())));
         String emailVerificationToken = generateEmailVerificationToken();
         String hashedToken = encoder.encode(emailVerificationToken);
+        user.setEmailVerificationToken(hashedToken);
+        user.setEmailVerificationTokenExpiryDate(LocalDateTime.now().plusMinutes(durationInMinutes));
 
         userRepository.save(user);
 
