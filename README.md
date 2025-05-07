@@ -1,4 +1,3 @@
-<img src = "./screenshot.png"/>
 
 ## Running the project on your machine
 
