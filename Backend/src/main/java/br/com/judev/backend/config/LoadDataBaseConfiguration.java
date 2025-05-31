@@ -17,7 +17,7 @@ public class LoadDataBaseConfiguration {
         this.encoder = encoder;
     }
 
-
+    // Método que será executado ao subir a aplicação
     @Bean
     public CommandLineRunner initDatabase(UserRepository userRepository) {
         return args -> {

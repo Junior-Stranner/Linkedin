@@ -34,6 +34,11 @@ public class AuthenticationController {
         return authenticationService.register(registerRequest);
     }
 
+    @PutMapping("/validate-email-verification-token")
+    public Response verifyEmail(@RequestParam String token, @RequestAttribute("authenticatedUser") User user) {
+        authenticationService.validateEmailVerificationToken(token, user.getEmail());
+        return new Response("Email verified successfully.");
+    }
 
     @GetMapping("/send-email-verification-token")
     public Response sendEmailVerificationToken(@RequestAttribute("authenticatedUser") User user) {

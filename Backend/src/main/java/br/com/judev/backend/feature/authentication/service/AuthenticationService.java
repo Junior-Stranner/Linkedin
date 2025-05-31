@@ -70,6 +70,22 @@ public class AuthenticationService {
         }
     }
 
+    public void validateEmailVerificationToken(String token, String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isPresent() && encoder.matches(token, user.get().getEmailVerificationToken())
+                && !user.get().getEmailVerificationTokenExpiryDate().isBefore(LocalDateTime.now())) {
+            user.get().setEmailVerified(true);
+            user.get().setEmailVerificationToken(null);
+            user.get().setEmailVerificationTokenExpiryDate(null);
+            userRepository.save(user.get());
+        } else if (user.isPresent() && encoder.matches(token, user.get().getEmailVerificationToken())
+                && user.get().getEmailVerificationTokenExpiryDate().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Email verification token expired.");
+        } else {
+            throw new IllegalArgumentException("Email verification token failed.");
+        }
+    }
+
     public AuthenticationResponseDTO register(AuthenticationRequestDTO registerRequest) {
 
         User user = userRepository.save(new User(registerRequest.email(), encoder.encode(registerRequest.password())));

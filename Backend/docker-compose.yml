@@ -1,17 +1,39 @@
-version: '3.8'
+version: '3.9'
 
 services:
+  backend:
+    build: .
+    container_name: backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - mailhog
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/linkedindb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=123
+      - MAIL_HOST=mailhog
+      - MAIL_PORT=1025
+
   postgres:
     image: postgres:15
-    environment:
-      POSTGRES_DB: linkedin
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+    container_name: backend-postgres
     ports:
-      - '5432:5432'
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: linkedindb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
 
   mailhog:
-    image: mailhog/mailhog:v1.0.1
+    image: mailhog/mailhog
+    container_name: backend-mailhog
     ports:
-      - '1025:1025'
-      - '8025:8025'  # Web UI for viewing emails
+      - "8025:8025"
+      - "1025:1025"
+
+volumes:
+  postgres-data:
