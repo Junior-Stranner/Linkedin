@@ -17,11 +17,12 @@ import java.util.List;
 
 @Component
 public class AuthenticationFilter  extends HttpFilter {
+
     private final List<String> unsecuredEndpoints = Arrays.asList(
-            "/api/v1/authentication/login",
-            "/api/v1/authentication/register",
-            "/api/v1/authentication/send-password-reset-token",
-            "/api/v1/authentication/reset-password");
+            "/api/v1/auth/login",
+            "/api/v1/auth/register",
+            "/api/v1/auth/send-password-reset-token",
+            "/api/v1/auth/reset-password");
 
     private final JwtToken jsonWebTokenService;
     private final AuthenticationService authenticationService;
@@ -49,7 +50,7 @@ public class AuthenticationFilter  extends HttpFilter {
 
         // 3. Verifica se a URL é pública (não exige autenticação)
         String path = request.getRequestURI();
-        if (unsecuredEndpoints.contains(path) || path.startsWith("/api/v1/authentication/oauth") || path.startsWith("/api/v1/storage")) {
+        if (unsecuredEndpoints.contains(path) || path.startsWith("/api/v1/auth/oauth") || path.startsWith("/api/v1/storage")) {
             chain.doFilter(request, response); // segue a requisição normalmente
             return;
         }

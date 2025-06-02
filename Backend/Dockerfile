@@ -1,14 +1,10 @@
-# 1. Imagem base: JDK para rodar Java
-FROM openjdk:22-jdk-alpine
-
-# 2. Diretório de trabalho dentro do container
+FROM maven:3.9.4-eclipse-temurin-21 AS build
 WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 
-# 3. Copia o arquivo .jar gerado pelo build para dentro do container
-COPY target/backend.jar backend.jar
-
-# 4. Expõe a porta 8080 para acesso externo
 EXPOSE 8080
-
-# 5. Comando para rodar a aplicação
-ENTRYPOINT ["java", "-jar", "backend.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

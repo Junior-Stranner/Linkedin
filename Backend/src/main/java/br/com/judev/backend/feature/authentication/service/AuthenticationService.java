@@ -49,12 +49,16 @@ public class AuthenticationService {
 
     public void sendEmailVerificationToken(String email) {
         Optional<User> user = userRepository.findByEmail(email);
+
         if (user.isPresent() && !user.get().getEmailVerified()) {
+
             String emailVerificationToken = generateEmailVerificationToken();
             String hashedToken = encoder.encode(emailVerificationToken);
+
             user.get().setEmailVerificationToken(hashedToken);
             user.get().setEmailVerificationTokenExpiryDate(LocalDateTime.now().plusMinutes(durationInMinutes));
             userRepository.save(user.get());
+
             String subject = "Email Verification";
             String body = String.format("Only one step to take full advantage of LinkedIn.\n\n"
                             + "Enter this code to verify your email: " + "%s\n\n" + "The code will expire in " + "%s"
@@ -74,10 +78,12 @@ public class AuthenticationService {
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isPresent() && encoder.matches(token, user.get().getEmailVerificationToken())
                 && !user.get().getEmailVerificationTokenExpiryDate().isBefore(LocalDateTime.now())) {
+
             user.get().setEmailVerified(true);
             user.get().setEmailVerificationToken(null);
             user.get().setEmailVerificationTokenExpiryDate(null);
             userRepository.save(user.get());
+
         } else if (user.isPresent() && encoder.matches(token, user.get().getEmailVerificationToken())
                 && user.get().getEmailVerificationTokenExpiryDate().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Email verification token expired.");
@@ -88,7 +94,7 @@ public class AuthenticationService {
 
     public AuthenticationResponseDTO register(AuthenticationRequestDTO registerRequest) {
 
-        User user = userRepository.save(new User(registerRequest.email(), encoder.encode(registerRequest.password())));
+        User user = new User(registerRequest.email(), encoder.encode(registerRequest.password()));
         String emailVerificationToken = generateEmailVerificationToken();
         String hashedToken = encoder.encode(emailVerificationToken);
         user.setEmailVerificationToken(hashedToken);
