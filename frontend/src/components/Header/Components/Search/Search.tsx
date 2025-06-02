@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { IUser } from "../../../../features/authentication/contexts/AuthenticationContextProvider";
 import { request } from "../../../../utils/api";
 import { Input } from "../../../Input/Input";
 import classes from "./Search.module.scss";
