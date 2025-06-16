@@ -98,3 +98,7 @@ export function Profile({
     </div>
   );
 }
+
+function useAuthentication(): { logout: any; user: any; } {
+  throw new Error("Function not implemented.");
+}
