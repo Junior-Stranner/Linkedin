@@ -78,8 +78,40 @@ const router = createBrowserRouter([
             element: <Posts />,
           },
         ],
-      },]
-]
+      },
+      {
+        path: "/authentication",
+        element: <AuthenticationLayout />,
+        children: [
+          {
+            path: "login",
+            element: <Login />,
+          },
+          {
+            path: "signup",
+            element: <Signup />,
+          },
+          {
+            path: "request-password-reset",
+            element: <ResetPassword />,
+          },
+          {
+            path: "verify-email",
+            element: <VerifyEmail />,
+          },
+          {
+            path: "profile/:id",
+            element: <LoginProfile />,
+          },
+        ],
+      },
+      {
+        path: "*",
+        element: <Navigate to="/" />,
+      },
+    ],
+  },
+]);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
