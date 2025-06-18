@@ -156,4 +156,19 @@ public class AuthenticationService {
             throw new IllegalArgumentException("User not found.");
         }
     }
+    public void resetPassword(String email, String newPassword, String token) {
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isPresent() && encoder.matches(token, user.get().getPasswordResetToken())
+                && !user.get().getPasswordResetTokenExpiryDate().isBefore(LocalDateTime.now())) {
+            user.get().setPasswordResetToken(null);
+            user.get().setPasswordResetTokenExpiryDate(null);
+            user.get().setPassword(encoder.encode(newPassword));
+            userRepository.save(user.get());
+        } else if (user.isPresent() && encoder.matches(token, user.get().getPasswordResetToken())
+                && user.get().getPasswordResetTokenExpiryDate().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Password reset token expired.");
+        } else {
+            throw new IllegalArgumentException("Password reset token failed.");
+        }
+    }
 }
