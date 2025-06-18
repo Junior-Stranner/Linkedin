@@ -132,4 +132,28 @@ public class AuthenticationService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
     }
+
+    public void sendPasswordResetToken(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isPresent()) {
+            String passwordResetToken = generateEmailVerificationToken();
+            String hashedToken = encoder.encode(passwordResetToken);
+            user.get().setPasswordResetToken(hashedToken);
+            user.get().setPasswordResetTokenExpiryDate(LocalDateTime.now().plusMinutes(durationInMinutes));
+            userRepository.save(user.get());
+            String subject = "Password Reset";
+            String body = String.format("""
+                    You requested a password reset.
+
+                    Enter this code to reset your password: %s. The code will expire in %s minutes.""",
+                    passwordResetToken, durationInMinutes);
+            try {
+                emailService.sendEmail(email, subject, body);
+            } catch (Exception e) {
+                logger.info("Error while sending email: {}", e.getMessage());
+            }
+        } else {
+            throw new IllegalArgumentException("User not found.");
+        }
+    }
 }

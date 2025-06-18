@@ -22,6 +22,10 @@ public class User {
     private LocalDateTime emailVerificationTokenExpiryDate = null;
     @JsonIgnore
     private String password;
+    @JsonIgnore
+    private String password;
+    private String passwordResetToken = null;
+    private LocalDateTime passwordResetTokenExpiryDate = null;
 
     public User(String email, String password) {
         this.email = email;
@@ -69,6 +73,22 @@ public class User {
 
     public void setEmailVerificationToken(String emailVerificationToken) {
         this.emailVerificationToken = emailVerificationToken;
+    }
+
+    public String getPasswordResetToken() {
+        return passwordResetToken;
+    }
+
+    public void setPasswordResetToken(String passwordResetToken) {
+        this.passwordResetToken = passwordResetToken;
+    }
+
+    public LocalDateTime getPasswordResetTokenExpiryDate() {
+        return passwordResetTokenExpiryDate;
+    }
+
+    public void setPasswordResetTokenExpiryDate(LocalDateTime passwordResetTokenExpiryDate) {
+        this.passwordResetTokenExpiryDate = passwordResetTokenExpiryDate;
     }
 
     public LocalDateTime getEmailVerificationTokenExpiryDate() {

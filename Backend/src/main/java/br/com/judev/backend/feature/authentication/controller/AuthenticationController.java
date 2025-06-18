@@ -44,4 +44,10 @@ public class AuthenticationController {
         authenticationService.sendEmailVerificationToken(user.getEmail());
         return new Response("Email verification token sent successfully.");
     }
+
+    @PutMapping("/send-password-reset-token")
+    public Response sendPasswordResetToken(@RequestParam String email) {
+        authenticationService.sendPasswordResetToken(email);
+        return new Response("Password reset token sent successfully.");
+    }
 }
