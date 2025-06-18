@@ -50,4 +50,11 @@ public class AuthenticationController {
         authenticationService.sendPasswordResetToken(email);
         return new Response("Password reset token sent successfully.");
     }
+
+    @PutMapping("/reset-password")
+    public Response resetPassword(@RequestParam String newPassword, @RequestParam String token,
+                                  @RequestParam String email) {
+        authenticationService.resetPassword(email, newPassword, token);
+        return new Response("Password reset successfully.");
+    }
 }
