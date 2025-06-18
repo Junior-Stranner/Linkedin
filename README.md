@@ -14,6 +14,7 @@ Este é um projeto Fullstack que replica funcionalidades essenciais do LinkedIn,
 - MySQL
 - Bean Validation
 - Docker
+- -Mailhog/JavMail
 
 ### 💻 Frontend (React)
 - ReactJS
@@ -36,10 +37,6 @@ Este é um projeto Fullstack que replica funcionalidades essenciais do LinkedIn,
 ┃ ┣ 📂components
 ┃ ┣ 📂pages
 ┃ ┗ 📂services
-
-yaml
-Copiar
-Editar
 
 ---
 
