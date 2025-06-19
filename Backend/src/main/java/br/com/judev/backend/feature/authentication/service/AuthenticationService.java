@@ -1,9 +1,6 @@
 package br.com.judev.backend.feature.authentication.service;
 
-import br.com.judev.backend.feature.authentication.dto.AuthenticationRequestDTO;
-import br.com.judev.backend.feature.authentication.dto.AuthenticationResponseDTO;
-import br.com.judev.backend.feature.authentication.dto.UpdateUserRequest;
-import br.com.judev.backend.feature.authentication.dto.UpdateUserResponse;
+import br.com.judev.backend.feature.authentication.dto.*;
 import br.com.judev.backend.feature.authentication.model.User;
 import br.com.judev.backend.feature.authentication.repository.UserRepository;
 import br.com.judev.backend.feature.authentication.utils.Encoder;
@@ -191,6 +188,12 @@ public class AuthenticationService {
             user.setAbout(request.about());
         User updatedUser = userRepository.save(user);
         return new UpdateUserResponse(updatedUser);
+    }
+
+    public UserResponse getUserById(Long receiverId) {
+        User user = userRepository.findById(receiverId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+        return new UserResponse(user);
     }
 
 }
