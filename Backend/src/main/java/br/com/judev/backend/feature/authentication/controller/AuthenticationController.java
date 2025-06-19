@@ -57,4 +57,6 @@ public class AuthenticationController {
         authenticationService.resetPassword(email, newPassword, token);
         return new Response("Password reset successfully.");
     }
+
+
 }

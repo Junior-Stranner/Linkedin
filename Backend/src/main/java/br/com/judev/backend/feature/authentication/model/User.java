@@ -22,10 +22,22 @@ public class User {
     private LocalDateTime emailVerificationTokenExpiryDate = null;
     @JsonIgnore
     private String password;
-    @JsonIgnore
-    private String password;
     private String passwordResetToken = null;
     private LocalDateTime passwordResetTokenExpiryDate = null;
+
+    @FullTextField(analyzer = "standard")
+    private String firstName = null;
+    @FullTextField(analyzer = "standard")
+    private String lastName = null;
+    @FullTextField(analyzer = "standard")
+    private String company = null;
+    @FullTextField(analyzer = "standard")
+    private String position = null;
+    private String location = null;
+    private String profilePicture = null;
+    private String coverPicture = null;
+    private Boolean profileComplete = false;
+    private String about = null;
 
     public User(String email, String password) {
         this.email = email;
