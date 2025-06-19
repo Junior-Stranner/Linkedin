@@ -7,6 +7,23 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+/*
+A anotação @FullTextField é usada para marcar um campo da entidade como indexado para busca textual completa
+ (full-text search). Ou seja, esse campo será armazenado em um índice e poderá ser pesquisado com recursos como:
+Busca por palavras-chave,
+Busca parcial (ex: "Jo" encontra "João"),
+Relevância,
+Tokenização, etc.
+
+O parâmetro analyzer define como o texto será processado antes de ser armazenado no índice.
+ O "standard" é o analisador padrão do Lucene/Elasticsearch, que:
+Converte texto para minúsculas,
+Remove pontuação,
+Divide o texto por espaços,
+E aplica outras regras básicas de tokenização.
+ */
 @Entity(name = "users")
 //@Indexed(index = "users")
 public class User {
@@ -109,5 +126,77 @@ public class User {
 
     public void setEmailVerificationTokenExpiryDate(LocalDateTime emailVerificationTokenExpiryDate) {
         this.emailVerificationTokenExpiryDate = emailVerificationTokenExpiryDate;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getCompany() {
+        return company;
+    }
+
+    public void setCompany(String company) {
+        this.company = company;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
+    }
+
+    public String getCoverPicture() {
+        return coverPicture;
+    }
+
+    public void setCoverPicture(String coverPicture) {
+        this.coverPicture = coverPicture;
+    }
+
+    public Boolean getProfileComplete() {
+        return profileComplete;
+    }
+
+    public void setProfileComplete(Boolean profileComplete) {
+        this.profileComplete = profileComplete;
+    }
+
+    public String getAbout() {
+        return about;
+    }
+
+    public void setAbout(String about) {
+        this.about = about;
     }
 }

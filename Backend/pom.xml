@@ -96,6 +96,26 @@
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
+        <!-- Hibernate Search ORM Mapper -->
+        <dependency>
+            <groupId>org.hibernate.search</groupId>
+            <artifactId>hibernate-search-mapper-orm</artifactId>
+            <version>7.2.2.Final</version>
+        </dependency>
+
+        <!-- Hibernate Search Lucene Backend -->
+        <dependency>
+            <groupId>org.hibernate.search</groupId>
+            <artifactId>hibernate-search-backend-lucene</artifactId>
+            <version>7.2.2.Final</version>
+        </dependency>
+
+        <!-- JBoss Logging (requisito do Hibernate) -->
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
+            <version>3.6.1.Final</version>
+        </dependency>
     </dependencies>
 
     <build>
