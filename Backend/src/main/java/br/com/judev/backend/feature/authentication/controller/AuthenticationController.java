@@ -8,8 +8,10 @@ import br.com.judev.backend.feature.authentication.dto.UpdateUserResponse;
 import br.com.judev.backend.feature.authentication.model.User;
 import br.com.judev.backend.feature.authentication.service.AuthenticationService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -61,10 +63,16 @@ public class AuthenticationController {
         return new Response("Password reset successfully.");
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UpdateUserResponse> updateUser(
+    @PutMapping("/profile/{id}/info")
+    public ResponseEntity<UpdateUserResponse> updateUserProfile(
+            @RequestAttribute("authenticatedUser") User user,
             @PathVariable Long id,
             @RequestBody UpdateUserRequest request) {
+
+        if (!user.getId().equals(id)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "User does not have permission to update this profile.");
+        }
         UpdateUserResponse response = authenticationService.updateUserProfile(id, request);
         return ResponseEntity.ok(response);
     }
