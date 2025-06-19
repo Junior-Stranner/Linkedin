@@ -2,6 +2,8 @@ package br.com.judev.backend.feature.authentication.service;
 
 import br.com.judev.backend.feature.authentication.dto.AuthenticationRequestDTO;
 import br.com.judev.backend.feature.authentication.dto.AuthenticationResponseDTO;
+import br.com.judev.backend.feature.authentication.dto.UpdateUserRequest;
+import br.com.judev.backend.feature.authentication.dto.UpdateUserResponse;
 import br.com.judev.backend.feature.authentication.model.User;
 import br.com.judev.backend.feature.authentication.repository.UserRepository;
 import br.com.judev.backend.feature.authentication.utils.Encoder;
@@ -172,20 +174,23 @@ public class AuthenticationService {
         }
     }
 
-    public User updateUserProfile(User user, String firstName, String lastName, String company,
-                                  String position, String location, String about) {
-        if (firstName != null)
-            user.setFirstName(firstName);
-        if (lastName != null)
-            user.setLastName(lastName);
-        if (company != null)
-            user.setCompany(company);
-        if (position != null)
-            user.setPosition(position);
-        if (location != null)
-            user.setLocation(location);
-        if (about != null)
-            user.setAbout(about);
-        return userRepository.save(user);
+    public UpdateUserResponse updateUserProfile(Long userId, UpdateUserRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        if (request.firstName() != null)
+            user.setFirstName(request.firstName());
+        if (request.lastName() != null)
+            user.setLastName(request.lastName());
+        if (request.company() != null)
+            user.setCompany(request.company());
+        if (request.position() != null)
+            user.setPosition(request.position());
+        if (request.location() != null)
+            user.setLocation(request.location());
+        if (request.about() != null)
+            user.setAbout(request.about());
+        User updatedUser = userRepository.save(user);
+        return new UpdateUserResponse(updatedUser);
     }
+
 }

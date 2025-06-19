@@ -3,9 +3,12 @@ package br.com.judev.backend.feature.authentication.controller;
 import br.com.judev.backend.dto.Response;
 import br.com.judev.backend.feature.authentication.dto.AuthenticationRequestDTO;
 import br.com.judev.backend.feature.authentication.dto.AuthenticationResponseDTO;
+import br.com.judev.backend.feature.authentication.dto.UpdateUserRequest;
+import br.com.judev.backend.feature.authentication.dto.UpdateUserResponse;
 import br.com.judev.backend.feature.authentication.model.User;
 import br.com.judev.backend.feature.authentication.service.AuthenticationService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -58,5 +61,12 @@ public class AuthenticationController {
         return new Response("Password reset successfully.");
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<UpdateUserResponse> updateUser(
+            @PathVariable Long id,
+            @RequestBody UpdateUserRequest request) {
+        UpdateUserResponse response = authenticationService.updateUserProfile(id, request);
+        return ResponseEntity.ok(response);
+    }
 
 }
