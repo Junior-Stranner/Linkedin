@@ -1,67 +1,81 @@
-# 🧑‍💼 Clone do LinkedIn - Projeto Fullstack
+🧑‍💼 Clone do LinkedIn – Projeto Fullstack
+Este é um projeto Fullstack que replica funcionalidades essenciais da rede social LinkedIn, desenvolvido com Spring Boot (Java) no backend e ReactJS no frontend.
 
-Este é um projeto Fullstack que replica funcionalidades essenciais do LinkedIn, desenvolvido com **Spring Boot (Java)** no backend e **ReactJS** no frontend. A ideia é criar uma rede social profissional, com foco em conexões, publicações, perfis e interações, além de aplicar na prática boas práticas de desenvolvimento web moderno.
+O objetivo é construir uma plataforma profissional com recursos como conexões entre usuários, postagens, interações e perfis personalizados, aplicando boas práticas modernas de desenvolvimento web.
 
----
+🚀 Tecnologias Utilizadas
+🔧 Backend (Java + Spring Boot)
+Spring Boot (Web, Security, JPA)
 
-## 🚀 Tecnologias Utilizadas
+OAuth2 e JWT para autenticação segura
 
-### 🔧 Backend (Java + Spring Boot)
-- Spring Web
-- Spring Security + Oauth2
-- Spring Data JPA
-- JWT (Autenticação)
-- MySQL
-- Bean Validation
-- Docker
-- -Mailhog/JavMail
+Spring Data JPA com MySQL
 
-### 💻 Frontend (React)
-- ReactJS
-- Axios
-- React Router DOM
-- Styled Components / TailwindCSS (a depender)
-- Context API
+Bean Validation
 
----
+Mailhog + JavaMail (verificação de e-mail)
 
-## 📁 Estrutura do Projeto
+Docker (containerização)
 
-📦linkedin-clone/
-┣ 📂backend/
-┃ ┣ 📂controller
-┃ ┣ 📂service
-┃ ┣ 📂model
-┃ ┗ 📂repository
-┣ 📂frontend/
-┃ ┣ 📂components
-┃ ┣ 📂pages
-┃ ┗ 📂services
+💻 Frontend (ReactJS)
+ReactJS
 
----
+Axios (requisições HTTP)
 
-## 🔐 Funcionalidades
+React Router DOM (navegação SPA)
 
-✅ Autenticação com JWT  
-✅ Cadastro e login de usuários  
-✅ Visualização e edição de perfil  
-✅ Conexão entre usuários  
-✅ Criação de postagens  
-✅ Comentários e curtidas  
-✅ Upload de imagens de perfil e posts  
+Styled Components ou TailwindCSS
 
----
+Context API (gerenciamento de estado)
 
-## 📦 Como rodar o projeto
+📁 Estrutura do Projeto
+php
+Copiar
+Editar
+linkedin-clone/
+├── backend/
+│   ├── controller/
+│   ├── service/
+│   ├── model/
+│   └── repository/
+├── frontend/
+│   ├── components/
+│   ├── pages/
+│   └── services/
 
-### Backend
-```bash
+🔐 Funcionalidades Implementadas
+✅ Cadastro e login de usuários
+✅ Autenticação e autorização com JWT
+✅ Verificação de e-mail
+✅ Visualização e edição de perfil
+✅ Upload de imagem de perfil e capa
+✅ Conexão entre usuários
+✅ Criação e exibição de postagens
+✅ Curtidas e comentários
+
+
+▶️ Como Executar o Projeto
+
+1. Clonar o repositório
+bash
+Copiar
+Editar
+git clone https://github.com/seu-usuario/linkedin-clone.git
+cd linkedin-clone
+
+3. Backend (Spring Boot)
+bash
+Copiar
+Editar
 cd backend
 ./mvnw spring-boot:run
-Frontend
+Certifique-se de ter o MySQL rodando e configure application.properties com suas credenciais.
+
+4. Frontend (React)
 bash
 Copiar
 Editar
 cd frontend
 npm install
 npm run dev
+A aplicação será iniciada em http://localhost:5173 (ou porta equivalente).
