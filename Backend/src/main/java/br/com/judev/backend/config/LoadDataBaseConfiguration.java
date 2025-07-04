@@ -10,7 +10,11 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class LoadDataBaseConfiguration {
-
+    private static final int NUM_USERS = 500;
+    private static final int MIN_POSTS_PER_USER = 1;
+    private static final int MAX_POSTS_PER_USER = 3;
+    private static final int MIN_CONNECTIONS_PER_USER = 0;
+    private static final int MAX_CONNECTIONS_PER_USER = 3;
     private final Encoder encoder;
 
     public LoadDataBaseConfiguration(Encoder encoder) {
