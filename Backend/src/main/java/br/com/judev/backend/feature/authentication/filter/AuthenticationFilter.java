@@ -47,14 +47,12 @@ public class AuthenticationFilter  extends HttpFilter {
             return;
         }
 
-
         // 3. Verifica se a URL é pública (não exige autenticação)
         String path = request.getRequestURI();
         if (unsecuredEndpoints.contains(path) || path.startsWith("/api/v1/auth/oauth") || path.startsWith("/api/v1/storage")) {
             chain.doFilter(request, response); // segue a requisição normalmente
             return;
         }
-
 
         try {
             // 4. Requisições protegidas: busca o token no cabeçalho Authorization
@@ -63,13 +61,11 @@ public class AuthenticationFilter  extends HttpFilter {
                 throw new ServletException("Token missing.");
             }
 
-
             // 5. Valida o token
             String token = authorization.substring(7); // Remove "Bearer "
             if (jsonWebTokenService.isTokenExpired(token)) {
                 throw new ServletException("Invalid token");
             }
-
             // 6. Recupera email do token e busca o usuário
             String email = jsonWebTokenService.getEmailFromToken(token);
             User user = authenticationService.getUser(email);
