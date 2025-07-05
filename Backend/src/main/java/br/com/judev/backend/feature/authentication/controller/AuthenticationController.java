@@ -80,9 +80,12 @@ public class AuthenticationController {
         return ResponseEntity.ok(userResponse);
     }
 
+    @DeleteMapping("/delete")
+    public Response deleteUser(@RequestAttribute("authenticatedUser") User user) {
+        authenticationService.deleteUser(user.getEmail());
+        return new Response("User deleted successfully.");
+    }
 }
-
-
 
 /*
 "authenticatedUser"

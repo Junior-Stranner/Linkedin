@@ -190,4 +190,9 @@ public class AuthenticationService {
         return new UserResponse(user);
     }
 
+    public void deleteUser(String email) {
+        User deleteUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found, and cannot exclude!"));
+        userRepository.delete(deleteUser);
+    }
 }
