@@ -64,17 +64,13 @@ public class AuthenticationController {
         return new Response("Password reset successfully.");
     }
 
-    @PutMapping("/profile/{id}/info")
+    @PutMapping("/profile/info")
     public ResponseEntity<UpdateUserResponse> updateUserProfile(
+            //Significado do @RequestAttribute no final
             @RequestAttribute("authenticatedUser") User user,
-            @PathVariable Long id,
             @RequestBody UpdateUserRequest request) {
 
-        if (!user.getId().equals(id)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "User does not have permission to update this profile.");
-        }
-        UpdateUserResponse response = authenticationService.updateUserProfile(id, request);
+        UpdateUserResponse response = authenticationService.updateUserProfile(user.getId(), request);
         return ResponseEntity.ok(response);
     }
 
@@ -85,3 +81,17 @@ public class AuthenticationController {
     }
 
 }
+
+
+
+/*
+"authenticatedUser"
+// Exemplo em um filtro ou interceptor
+// usuário obtido via token JWT
+Atributo da requisição, colocado por filtros/interceptors
+
+ Quando usar @RequestAttribute?
+Quando você injeta dados via filtro, como o User autenticado.
+Para evitar buscar o usuário no banco de novo em cada controller.
+Para reaproveitar dados compartilhados na requisição (ex: tenant, token, usuário).
+ */
