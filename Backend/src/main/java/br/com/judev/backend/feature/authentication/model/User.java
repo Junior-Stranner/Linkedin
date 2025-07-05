@@ -64,30 +64,6 @@ public class User {
     public User() {
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public Boolean getEmailVerified() {
         return emailVerified;
     }
@@ -96,12 +72,24 @@ public class User {
         this.emailVerified = emailVerified;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
     public String getEmailVerificationToken() {
         return emailVerificationToken;
     }
 
     public void setEmailVerificationToken(String emailVerificationToken) {
         this.emailVerificationToken = emailVerificationToken;
+    }
+
+    public LocalDateTime getEmailVerificationTokenExpiryDate() {
+        return emailVerificationTokenExpiryDate;
+    }
+
+    public void setEmailVerificationTokenExpiryDate(LocalDateTime emailVerificationTokenExpiryDate) {
+        this.emailVerificationTokenExpiryDate = emailVerificationTokenExpiryDate;
     }
 
     public String getPasswordResetToken() {
@@ -120,12 +108,12 @@ public class User {
         this.passwordResetTokenExpiryDate = passwordResetTokenExpiryDate;
     }
 
-    public LocalDateTime getEmailVerificationTokenExpiryDate() {
-        return emailVerificationTokenExpiryDate;
+    public String getPassword() {
+        return password;
     }
 
-    public void setEmailVerificationTokenExpiryDate(LocalDateTime emailVerificationTokenExpiryDate) {
-        this.emailVerificationTokenExpiryDate = emailVerificationTokenExpiryDate;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getFirstName() {
@@ -134,6 +122,7 @@ public class User {
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;
+        updateProfileCompletionStatus();
     }
 
     public String getLastName() {
@@ -142,6 +131,25 @@ public class User {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+        updateProfileCompletionStatus();
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+        updateProfileCompletionStatus();
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
+        updateProfileCompletionStatus();
     }
 
     public String getCompany() {
@@ -152,20 +160,31 @@ public class User {
         this.company = company;
     }
 
-    public String getPosition() {
-        return position;
+    public Long getId() {
+        return id;
     }
 
-    public void setPosition(String position) {
-        this.position = position;
+    public void updateProfile(String firstName, String lastName, String company,
+                              String position, String location, String about) {
+        if (firstName != null) this.firstName = firstName;
+        if (lastName != null) this.lastName = lastName;
+        if (company != null) this.company = company;
+        if (position != null) this.position = position;
+        if (location != null) this.location = location;
+        if (about != null) this.about = about;
+
+        updateProfileCompletionStatus();
     }
 
-    public String getLocation() {
-        return location;
+    public void updateProfileCompletionStatus() {
+        this.profileComplete = (this.firstName != null && this.lastName != null &&
+                this.company != null && this.position != null &&
+                this.location != null);
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+
+    public Boolean getProfileComplete() {
+        return profileComplete;
     }
 
     public String getProfilePicture() {
@@ -182,14 +201,6 @@ public class User {
 
     public void setCoverPicture(String coverPicture) {
         this.coverPicture = coverPicture;
-    }
-
-    public Boolean getProfileComplete() {
-        return profileComplete;
-    }
-
-    public void setProfileComplete(Boolean profileComplete) {
-        this.profileComplete = profileComplete;
     }
 
     public String getAbout() {

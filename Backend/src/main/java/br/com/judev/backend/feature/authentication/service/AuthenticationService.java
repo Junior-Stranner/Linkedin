@@ -174,21 +174,15 @@ public class AuthenticationService {
     public UpdateUserResponse updateUserProfile(Long userId, UpdateUserRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
-        if (request.firstName() != null)
-            user.setFirstName(request.firstName());
-        if (request.lastName() != null)
-            user.setLastName(request.lastName());
-        if (request.company() != null)
-            user.setCompany(request.company());
-        if (request.position() != null)
-            user.setPosition(request.position());
-        if (request.location() != null)
-            user.setLocation(request.location());
-        if (request.about() != null)
-            user.setAbout(request.about());
-        User updatedUser = userRepository.save(user);
-        return new UpdateUserResponse(updatedUser);
+
+        user.updateProfile(request.firstName(), request.lastName(),
+                request.company(), request.position(),
+                request.location(), request.about());
+
+        userRepository.save(user);
+        return new UpdateUserResponse(user);
     }
+
 
     public UserResponse getUserById(Long receiverId) {
         User user = userRepository.findById(receiverId)
