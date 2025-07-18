@@ -1,37 +1,34 @@
-🧑‍💼 Clone do LinkedIn – Projeto Fullstack
-Este é um projeto Fullstack que replica funcionalidades essenciais da rede social LinkedIn, desenvolvido com Spring Boot (Java) no backend e ReactJS no frontend.
+🧑‍💼 Clone do LinkedIn — Projeto Fullstack
+Este é um projeto Fullstack inspirado no LinkedIn, que replica funcionalidades essenciais da rede social profissional.
+Foi desenvolvido com Spring Boot (Java) no backend e ReactJS no frontend, seguindo boas práticas modernas de desenvolvimento web.
 
-O objetivo é construir uma plataforma profissional com recursos como conexões entre usuários, postagens, interações e perfis personalizados, aplicando boas práticas modernas de desenvolvimento web.
+O objetivo é criar uma plataforma profissional com:
+Conexões entre usuários
+Postagens
+Interações sociais
+Perfis personalizados
 
 🚀 Tecnologias Utilizadas
 🔧 Backend (Java + Spring Boot)
 Spring Boot (Web, Security, JPA)
-
-OAuth2 e JWT para autenticação segura
-
-Spring Data JPA com MySQL
-
+OAuth2 + JWT (Autenticação segura)
+Spring Data JPA + MySQL
 Bean Validation
+JavaMail + Mailhog (Verificação de e-mail)
+Docker (Containerização)
 
-Mailhog + JavaMail (verificação de e-mail)
-
-Docker (containerização)
 
 💻 Frontend (ReactJS)
 ReactJS
 
-Axios (requisições HTTP)
-
-React Router DOM (navegação SPA)
-
+Axios (Requisições HTTP)
+React Router DOM (Navegação SPA)
 Styled Components ou TailwindCSS
+Context API (Gerenciamento de estado)
 
-Context API (gerenciamento de estado)
 
 📁 Estrutura do Projeto
-php
-Copiar
-Editar
+
 linkedin-clone/
 ├── backend/
 │   ├── controller/
@@ -53,29 +50,19 @@ linkedin-clone/
 ✅ Criação e exibição de postagens
 ✅ Curtidas e comentários
 
-
 ▶️ Como Executar o Projeto
+1️⃣ Clonar o repositório
 
-1. Clonar o repositório
-bash
-Copiar
-Editar
 git clone https://github.com/seu-usuario/linkedin-clone.git
 cd linkedin-clone
 
-3. Backend (Spring Boot)
-bash
-Copiar
-Editar
+2️⃣ Rodar o Backend (Spring Boot)
 cd backend
 ./mvnw spring-boot:run
-Certifique-se de ter o MySQL rodando e configure application.properties com suas credenciais.
+💡 Certifique-se de ter o MySQL rodando e o application.properties devidamente configurado.
 
-4. Frontend (React)
-bash
-Copiar
-Editar
+3️⃣ Rodar o Frontend (React)
 cd frontend
 npm install
 npm run dev
-A aplicação será iniciada em http://localhost:5173 (ou porta equivalente).
+💡 A aplicação será iniciada em: http://localhost:5173
