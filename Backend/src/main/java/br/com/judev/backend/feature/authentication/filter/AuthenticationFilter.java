@@ -11,18 +11,21 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
-
+/*
+	Filtro Antigo (HttpFilter)
+	HttpFilter (Servlet puro)
+ */
 @Component
-public class AuthenticationFilter  extends HttpFilter {
+public class AuthenticationFilter extends HttpFilter {
 
-    private final List<String> unsecuredEndpoints = Arrays.asList(
+    private static final List<String> UNSECURED_ENDPOINTS = List.of(
             "/api/v1/auth/login",
             "/api/v1/auth/register",
             "/api/v1/auth/send-password-reset-token",
-            "/api/v1/auth/reset-password");
+            "/api/v1/auth/reset-password"
+    );
 
     private final JwtToken jsonWebTokenService;
     private final AuthenticationService authenticationService;
@@ -49,7 +52,7 @@ public class AuthenticationFilter  extends HttpFilter {
 
         // 3. Verifica se a URL é pública (não exige autenticação)
         String path = request.getRequestURI();
-        if (unsecuredEndpoints.contains(path) || path.startsWith("/api/v1/auth/oauth") || path.startsWith("/api/v1/storage")) {
+        if (UNSECURED_ENDPOINTS.contains(path) || path.startsWith("/api/v1/auth/oauth") || path.startsWith("/api/v1/storage")) {
             chain.doFilter(request, response); // segue a requisição normalmente
             return;
         }
