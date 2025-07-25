@@ -1,18 +1,22 @@
 package br.com.judev.backend.feature.authentication.service;
 
+import br.com.judev.backend.exception.EmailAlreadyVerifiedException;
+import br.com.judev.backend.exception.TokenExpiredException;
+import br.com.judev.backend.exception.UserEmailNotFoundException;
 import br.com.judev.backend.feature.authentication.dto.*;
 import br.com.judev.backend.feature.authentication.model.User;
 import br.com.judev.backend.feature.authentication.repository.UserRepository;
 import br.com.judev.backend.feature.authentication.utils.Encoder;
 import br.com.judev.backend.feature.authentication.utils.JwtToken;
+import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 public class AuthenticationService {
@@ -24,17 +28,16 @@ public class AuthenticationService {
     private final JwtToken jwtToken;
     private final EmailService emailService;
 
-
-    public AuthenticationService(UserRepository userRepository, Encoder encoder, JwtToken jwtToken, EmailService emailService){
+    public AuthenticationService(UserRepository userRepository, Encoder encoder, JwtToken jwtToken, EmailService emailService) {
         this.userRepository = userRepository;
         this.encoder = encoder;
         this.jwtToken = jwtToken;
         this.emailService = emailService;
     }
 
-    public User getUserByEmail(String email){
+    public User getUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(
-                () -> new EntityNotFoundException("User not found."));
+                () -> new UserEmailNotFoundException("User not found with email: " + email));
     }
 
     public static String generateEmailVerificationToken() {
@@ -47,58 +50,18 @@ public class AuthenticationService {
     }
 
     public void sendEmailVerificationToken(String email) {
-        Optional<User> user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserEmailNotFoundException("User not found with email: " + email));
 
-        if (user.isPresent() && !user.get().getEmailVerified()) {
-
-            String emailVerificationToken = generateEmailVerificationToken();
-            String hashedToken = encoder.encode(emailVerificationToken);
-
-            user.get().setEmailVerificationToken(hashedToken);
-            user.get().setEmailVerificationTokenExpiryDate(LocalDateTime.now().plusMinutes(durationInMinutes));
-            userRepository.save(user.get());
-
-            String subject = "Email Verification";
-            String body = String.format("Only one step to take full advantage of LinkedIn.\n\n"
-                            + "Enter this code to verify your email: " + "%s\n\n" + "The code will expire in " + "%s"
-                            + " minutes.",
-                    emailVerificationToken, durationInMinutes);
-            try {
-                emailService.sendEmail(email, subject, body);
-            } catch (Exception e) {
-                logger.info("Error while sending email: {}", e.getMessage());
-            }
-        } else {
-            throw new IllegalArgumentException("Email verification token failed, or email is already verified.");
+        if (user.getEmailVerified()) {
+            throw new EmailAlreadyVerifiedException("Email already verified.");
         }
-    }
 
-    public void validateEmailVerificationToken(String token, String email) {
-        Optional<User> user = userRepository.findByEmail(email);
-        if (user.isPresent() && encoder.matches(token, user.get().getEmailVerificationToken())
-                && !user.get().getEmailVerificationTokenExpiryDate().isBefore(LocalDateTime.now())) {
-
-            user.get().setEmailVerified(true);
-            user.get().setEmailVerificationToken(null);
-            user.get().setEmailVerificationTokenExpiryDate(null);
-            userRepository.save(user.get());
-
-        } else if (user.isPresent() && encoder.matches(token, user.get().getEmailVerificationToken())
-                && user.get().getEmailVerificationTokenExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new TokenExpiredException("Email verification token expired.");
-        } else {
-            throw new IllegalArgumentException("Email verification token failed.");
-        }
-    }
-
-    public AuthenticationResponseDTO register(AuthenticationRequestDTO registerRequest) {
-
-        User user = new User(registerRequest.email(), encoder.encode(registerRequest.password()));
         String emailVerificationToken = generateEmailVerificationToken();
         String hashedToken = encoder.encode(emailVerificationToken);
+
         user.setEmailVerificationToken(hashedToken);
         user.setEmailVerificationTokenExpiryDate(LocalDateTime.now().plusMinutes(durationInMinutes));
-
         userRepository.save(user);
 
         String subject = "Email Verification";
@@ -107,17 +70,61 @@ public class AuthenticationService {
                 Enter this code to verify your email: %s. The code will expire in %s minutes.""",
                 emailVerificationToken, durationInMinutes);
         try {
-            emailService.sendEmail(registerRequest.email(), subject, body);
+            emailService.sendEmail(email, subject, body);
         } catch (Exception e) {
             logger.info("Error while sending email: {}", e.getMessage());
         }
-        String authToken = jwtToken.generateToken(registerRequest.email());
-        return new AuthenticationResponseDTO(authToken, "User registered successfully.");
+    }
+
+    public void validateEmailVerificationToken(String token, String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserEmailNotFoundException("User not found with email: " + email));
+
+        if (!encoder.matches(token, user.getEmailVerificationToken())) {
+            throw new IllegalArgumentException("Email verification token is invalid.");
+        }
+
+        if (user.getEmailVerificationTokenExpiryDate().isBefore(LocalDateTime.now())) {
+            throw new TokenExpiredException("Email verification token expired.");
+        }
+
+        user.setEmailVerified(true);
+        user.setEmailVerificationToken(null);
+        user.setEmailVerificationTokenExpiryDate(null);
+        userRepository.save(user);
+    }
+
+    public AuthenticationResponseDTO register(AuthenticationRequestDTO registerRequest) {
+        try {
+            User user = new User(registerRequest.email(), encoder.encode(registerRequest.password()));
+            String emailVerificationToken = generateEmailVerificationToken();
+            String hashedToken = encoder.encode(emailVerificationToken);
+            user.setEmailVerificationToken(hashedToken);
+            user.setEmailVerificationTokenExpiryDate(LocalDateTime.now().plusMinutes(durationInMinutes));
+            userRepository.save(user);
+
+            String subject = "Email Verification";
+            String body = String.format("""
+                    Only one step to take full advantage of LinkedIn.
+                    Enter this code to verify your email: %s. The code will expire in %s minutes.""",
+                    emailVerificationToken, durationInMinutes);
+            emailService.sendEmail(registerRequest.email(), subject, body);
+            String authToken = jwtToken.generateToken(registerRequest.email());
+            return new AuthenticationResponseDTO(authToken, "User registered successfully.");
+
+        } catch (DataIntegrityViolationException e) {
+            if (e.getMessage().contains("UK_email")) {
+                throw new DataIntegrityViolationException("Email already exists. Please use another email or login.");
+            }
+            throw new DataIntegrityViolationException("Database error while registering user.");
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public AuthenticationResponseDTO login(AuthenticationRequestDTO loginRequest) {
         User user = userRepository.findByEmail(loginRequest.email())
-                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+                .orElseThrow(() -> new UserEmailNotFoundException("User not found."));
 
         if (!encoder.matches(loginRequest.password(), user.getPassword())) {
             throw new IllegalArgumentException("Password is incorrect.");
@@ -129,46 +136,48 @@ public class AuthenticationService {
 
     public User getUser(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+                .orElseThrow(() -> new UserEmailNotFoundException("User not found."));
     }
 
     public void sendPasswordResetToken(String email) {
-        Optional<User> user = userRepository.findByEmail(email);
-        if (user.isPresent()) {
-            String passwordResetToken = generateEmailVerificationToken();
-            String hashedToken = encoder.encode(passwordResetToken);
-            user.get().setPasswordResetToken(hashedToken);
-            user.get().setPasswordResetTokenExpiryDate(LocalDateTime.now().plusMinutes(durationInMinutes));
-            userRepository.save(user.get());
-            String subject = "Password Reset";
-            String body = String.format("""
-                    You requested a password reset.
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserEmailNotFoundException("User not found."));
 
-                    Enter this code to reset your password: %s. The code will expire in %s minutes.""",
-                    passwordResetToken, durationInMinutes);
-            try {
-                emailService.sendEmail(email, subject, body);
-            } catch (Exception e) {
-                logger.info("Error while sending email: {}", e.getMessage());
-            }
-        } else {
-            throw new IllegalArgumentException("User not found.");
+        String passwordResetToken = generateEmailVerificationToken();
+        String hashedToken = encoder.encode(passwordResetToken);
+        user.setPasswordResetToken(hashedToken);
+        user.setPasswordResetTokenExpiryDate(LocalDateTime.now().plusMinutes(durationInMinutes));
+        userRepository.save(user);
+
+        String subject = "Password Reset";
+        String body = String.format("""
+                You requested a password reset.
+
+                Enter this code to reset your password: %s. The code will expire in %s minutes.""",
+                passwordResetToken, durationInMinutes);
+        try {
+            emailService.sendEmail(email, subject, body);
+        } catch (Exception e) {
+            logger.info("Error while sending email: {}", e.getMessage());
         }
     }
+
     public void resetPassword(String email, String newPassword, String token) {
-        Optional<User> user = userRepository.findByEmail(email);
-        if (user.isPresent() && encoder.matches(token, user.get().getPasswordResetToken())
-                && !user.get().getPasswordResetTokenExpiryDate().isBefore(LocalDateTime.now())) {
-            user.get().setPasswordResetToken(null);
-            user.get().setPasswordResetTokenExpiryDate(null);
-            user.get().setPassword(encoder.encode(newPassword));
-            userRepository.save(user.get());
-        } else if (user.isPresent() && encoder.matches(token, user.get().getPasswordResetToken())
-                && user.get().getPasswordResetTokenExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Password reset token expired.");
-        } else {
-            throw new IllegalArgumentException("Password reset token failed.");
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserEmailNotFoundException("User not found."));
+
+        if (!encoder.matches(token, user.getPasswordResetToken())) {
+            throw new IllegalArgumentException("Password reset token is invalid.");
         }
+
+        if (user.getPasswordResetTokenExpiryDate().isBefore(LocalDateTime.now())) {
+            throw new TokenExpiredException("Password reset token expired.");
+        }
+
+        user.setPasswordResetToken(null);
+        user.setPasswordResetTokenExpiryDate(null);
+        user.setPassword(encoder.encode(newPassword));
+        userRepository.save(user);
     }
 
     public UpdateUserResponse updateUserProfile(Long userId, UpdateUserRequest request) {
@@ -183,16 +192,15 @@ public class AuthenticationService {
         return new UpdateUserResponse(user);
     }
 
-
     public UserResponse getUserById(Long receiverId) {
         User user = userRepository.findById(receiverId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+                .orElseThrow(() -> new EntityNotFoundException("User not found."));
         return new UserResponse(user);
     }
 
     public void deleteUser(String email) {
         User deleteUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found, and cannot exclude!"));
+                .orElseThrow(() -> new UserEmailNotFoundException("User not found, and cannot exclude!"));
         userRepository.delete(deleteUser);
     }
 }
