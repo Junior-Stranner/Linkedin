@@ -85,7 +85,7 @@ public class AuthenticationService {
 
         } else if (user.isPresent() && encoder.matches(token, user.get().getEmailVerificationToken())
                 && user.get().getEmailVerificationTokenExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Email verification token expired.");
+            throw new TokenExpiredException("Email verification token expired.");
         } else {
             throw new IllegalArgumentException("Email verification token failed.");
         }

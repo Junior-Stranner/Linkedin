@@ -3,94 +3,89 @@ package br.com.judev.backend.exception.handler;
 import br.com.judev.backend.dto.ErrorDetails;
 import br.com.judev.backend.exception.InvalidTokenException;
 import br.com.judev.backend.exception.UserEmailNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-
-import java.nio.file.NoSuchFileException;
 import java.util.Date;
-import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Map<String, String>> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
-        return ResponseEntity.badRequest().body(Map.of("message", "Required request body is missing."));
-    }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public ResponseEntity<ErrorDetails> handleValidationException(MethodArgumentNotValidException e, WebRequest request) {
         StringBuilder errorMessage = new StringBuilder();
         e.getBindingResult().getFieldErrors().forEach(error ->
                 errorMessage.append(error.getField()).append(": ").append(error.getDefaultMessage()).append("; ")
         );
-        return ResponseEntity.badRequest().body(Map.of("message", errorMessage.toString()));
+
+        return ResponseEntity.badRequest().body(new ErrorDetails(
+                new Date(),
+                errorMessage.toString(),
+                request.getDescription(false)
+        ));
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorDetails> handleIllegalArgument(IllegalArgumentException e, WebRequest request) {
+        return ResponseEntity.badRequest().body(new ErrorDetails(
+                new Date(),
+                e.getMessage(),
+                request.getDescription(false)
+        ));
+    }
 
-    @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<Map<String, String>> handleNoResourceFoundException(NoResourceFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", e.getMessage()));
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorDetails> handleEntityNotFound(EntityNotFoundException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDetails(
+                new Date(),
+                e.getMessage(),
+                request.getDescription(false)
+        ));
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ErrorDetails> handleDataIntegrityViolationException(DataIntegrityViolationException e, WebRequest request) {
-        String message;
+    public ResponseEntity<ErrorDetails> handleDataIntegrityViolation(DataIntegrityViolationException e, WebRequest request) {
+        String message = e.getMessage().toLowerCase().contains("duplicate") || e.getMessage().contains("UK_email")
+                ? "Email already exists. Please use another email or login."
+                : "A database error occurred. Please try again later.";
 
-        if (e.getMessage().toLowerCase().contains("duplicate") || e.getMessage().contains("UK_email")) {
-            message = "Email already exists. Please use another email or login.";
-        } else {
-            message = "A database error occurred. Please try again later.";
-        }
-
-        ErrorDetails errorDetails = new ErrorDetails(new Date(), message, request.getDescription(false));
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDetails);
-    }
-
-
-    @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<Map<String, String>> handleMissingServletRequestParameterException(MissingServletRequestParameterException e) {
-        return ResponseEntity.badRequest().body(Map.of("message", "Required request parameter is missing."));
-    }
-
-    @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
-    public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
-    }
-
-    @ExceptionHandler(NoSuchFileException.class)
-    public ResponseEntity<Map<String, String>> handleNoSuchFileException(NoSuchFileException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "File not found"));
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleException(Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", e.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorDetails(
+                new Date(),
+                message,
+                request.getDescription(false)
+        ));
     }
 
     @ExceptionHandler(InvalidTokenException.class)
-    public ResponseEntity<ErrorDetails> handleInvalidTokenException(InvalidTokenException ex, WebRequest request) {
-        ErrorDetails errorDetails = new ErrorDetails(
+    public ResponseEntity<ErrorDetails> handleInvalidToken(InvalidTokenException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDetails(
                 new Date(),
-                ex.getMessage(),
+                e.getMessage(),
                 request.getDescription(false)
-        );
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDetails);
+        ));
     }
 
     @ExceptionHandler(UserEmailNotFoundException.class)
-    public ResponseEntity<ErrorDetails> handleUserEmailNotFoundException(UserEmailNotFoundException ex, WebRequest request) {
-        ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(), request.getDescription(false));
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDetails);
+    public ResponseEntity<ErrorDetails> handleUserEmailNotFound(UserEmailNotFoundException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDetails(
+                new Date(),
+                e.getMessage(),
+                request.getDescription(false)
+        ));
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorDetails> handleGeneralException(Exception e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorDetails(
+                new Date(),
+                e.getMessage(),
+                request.getDescription(false)
+        ));
+    }
 }

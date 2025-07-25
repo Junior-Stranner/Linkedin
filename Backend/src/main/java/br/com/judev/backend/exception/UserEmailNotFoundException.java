@@ -1,7 +1,8 @@
 package br.com.judev.backend.exception;
 
-public class UserEmailNotFoundException extends Throwable {
-    public UserEmailNotFoundException(String message){
+public class UserEmailNotFoundException extends RuntimeException {
+    public UserEmailNotFoundException(String message) {
         super(message);
     }
 }
+
