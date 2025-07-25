@@ -1,3 +1,5 @@
+package br.com.judev.backend.feature.storage.service;
+
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
