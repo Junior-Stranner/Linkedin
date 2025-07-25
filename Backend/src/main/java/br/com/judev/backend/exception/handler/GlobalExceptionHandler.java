@@ -1,5 +1,8 @@
 package br.com.judev.backend.exception.handler;
 
+import br.com.judev.backend.dto.ErrorDetails;
+import br.com.judev.backend.exception.InvalidTokenException;
+import br.com.judev.backend.exception.UserEmailNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,10 +11,12 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 
 import java.nio.file.NoSuchFileException;
+import java.util.Date;
 import java.util.Map;
 
 @ControllerAdvice
@@ -38,12 +43,19 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Map<String, String>> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
-        if (e.getMessage().contains("Duplicate entry")) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Email already exists, please use another email or login."));
+    public ResponseEntity<ErrorDetails> handleDataIntegrityViolationException(DataIntegrityViolationException e, WebRequest request) {
+        String message;
+
+        if (e.getMessage().toLowerCase().contains("duplicate") || e.getMessage().contains("UK_email")) {
+            message = "Email already exists. Please use another email or login.";
+        } else {
+            message = "A database error occurred. Please try again later.";
         }
-        return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+
+        ErrorDetails errorDetails = new ErrorDetails(new Date(), message, request.getDescription(false));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDetails);
     }
+
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<Map<String, String>> handleMissingServletRequestParameterException(MissingServletRequestParameterException e) {
@@ -63,6 +75,22 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleException(Exception e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", e.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ErrorDetails> handleInvalidTokenException(InvalidTokenException ex, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(
+                new Date(),
+                ex.getMessage(),
+                request.getDescription(false)
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDetails);
+    }
+
+    @ExceptionHandler(UserEmailNotFoundException.class)
+    public ResponseEntity<ErrorDetails> handleUserEmailNotFoundException(UserEmailNotFoundException ex, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(), request.getDescription(false));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDetails);
     }
 
 }
