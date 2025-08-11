@@ -1,6 +1,8 @@
 package br.com.judev.backend.exception.handler;
 
 import br.com.judev.backend.dto.ErrorDetails;
+import br.com.judev.backend.exception.EmailAlreadyExistsException;
+import br.com.judev.backend.exception.IncorrectPasswordException;
 import br.com.judev.backend.exception.InvalidTokenException;
 import br.com.judev.backend.exception.UserEmailNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
@@ -40,14 +42,24 @@ public class GlobalExceptionHandler {
         ));
     }
 
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ErrorDetails> handleEntityNotFound(EntityNotFoundException e, WebRequest request) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDetails(
+    @ExceptionHandler(IncorrectPasswordException.class)
+    public ResponseEntity<ErrorDetails> handleIncorrectPassword(IncorrectPasswordException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorDetails(
                 new Date(),
                 e.getMessage(),
                 request.getDescription(false)
         ));
     }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<ErrorDetails> handleEmailAlreadyExists(EmailAlreadyExistsException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorDetails(
+                new Date(),
+                e.getMessage(),
+                request.getDescription(false)
+        ));
+    }
+
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorDetails> handleDataIntegrityViolation(DataIntegrityViolationException e, WebRequest request) {

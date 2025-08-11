@@ -1,6 +1,7 @@
 package br.com.judev.backend.feature.authentication.service;
 
 import br.com.judev.backend.exception.EmailAlreadyVerifiedException;
+import br.com.judev.backend.exception.IncorrectPasswordException;
 import br.com.judev.backend.exception.TokenExpiredException;
 import br.com.judev.backend.exception.UserEmailNotFoundException;
 import br.com.judev.backend.feature.authentication.dto.*;
@@ -127,7 +128,7 @@ public class AuthenticationService {
                 .orElseThrow(() -> new UserEmailNotFoundException("User not found."));
 
         if (!encoder.matches(loginRequest.password(), user.getPassword())) {
-            throw new IllegalArgumentException("Password is incorrect.");
+            throw new IncorrectPasswordException("Password is incorrect.");
         }
 
         String token = jwtToken.generateToken(loginRequest.email());
