@@ -1,10 +1,7 @@
 package br.com.judev.backend.exception.handler;
 
 import br.com.judev.backend.dto.ErrorDetails;
-import br.com.judev.backend.exception.EmailAlreadyExistsException;
-import br.com.judev.backend.exception.IncorrectPasswordException;
-import br.com.judev.backend.exception.InvalidTokenException;
-import br.com.judev.backend.exception.UserEmailNotFoundException;
+import br.com.judev.backend.exception.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -60,6 +57,14 @@ public class GlobalExceptionHandler {
         ));
     }
 
+    @ExceptionHandler(EmailSendFailureException.class)
+    public ResponseEntity<ErrorDetails> handleEmailSendFailure(EmailSendFailureException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorDetails(
+                new Date(),
+                e.getMessage(),
+                request.getDescription(false)
+        ));
+    }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorDetails> handleDataIntegrityViolation(DataIntegrityViolationException e, WebRequest request) {
