@@ -1,9 +1,6 @@
 package br.com.judev.backend.feature.authentication.service;
 
-import br.com.judev.backend.exception.EmailAlreadyVerifiedException;
-import br.com.judev.backend.exception.IncorrectPasswordException;
-import br.com.judev.backend.exception.TokenExpiredException;
-import br.com.judev.backend.exception.UserEmailNotFoundException;
+import br.com.judev.backend.exception.*;
 import br.com.judev.backend.feature.authentication.dto.*;
 import br.com.judev.backend.feature.authentication.model.User;
 import br.com.judev.backend.feature.authentication.repository.UserRepository;
@@ -96,32 +93,40 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponseDTO register(AuthenticationRequestDTO registerRequest) {
-        try {
-            User user = new User(registerRequest.email(), encoder.encode(registerRequest.password()));
-            String emailVerificationToken = generateEmailVerificationToken();
-            String hashedToken = encoder.encode(emailVerificationToken);
-            user.setEmailVerificationToken(hashedToken);
-            user.setEmailVerificationTokenExpiryDate(LocalDateTime.now().plusMinutes(durationInMinutes));
-            userRepository.save(user);
-
-            String subject = "Email Verification";
-            String body = String.format("""
-                    Only one step to take full advantage of LinkedIn.
-                    Enter this code to verify your email: %s. The code will expire in %s minutes.""",
-                    emailVerificationToken, durationInMinutes);
-            emailService.sendEmail(registerRequest.email(), subject, body);
-            String authToken = jwtToken.generateToken(registerRequest.email());
-            return new AuthenticationResponseDTO(authToken, "User registered successfully.");
-
-        } catch (DataIntegrityViolationException e) {
-            if (e.getMessage().contains("UK_email")) {
-                throw new DataIntegrityViolationException("Email already exists. Please use another email or login.");
-            }
-            throw new DataIntegrityViolationException("Database error while registering user.");
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
+        if (userRepository.findByEmail(registerRequest.email()).isPresent()) {
+            throw new EmailAlreadyExistsException("Email already exists. Please use another email or login.");
         }
+
+        User user = new User(registerRequest.email(), encoder.encode(registerRequest.password()));
+        String emailVerificationToken = generateEmailVerificationToken();
+        String hashedToken = encoder.encode(emailVerificationToken);
+        user.setEmailVerificationToken(hashedToken);
+        user.setEmailVerificationTokenExpiryDate(LocalDateTime.now().plusMinutes(durationInMinutes));
+        userRepository.save(user);
+
+        try {
+            // persiste e força o flush para validar constraints agora
+            userRepository.saveAndFlush(user);
+        } catch (DataIntegrityViolationException e) {
+            // pode acontecer por race condition
+            throw new EmailAlreadyExistsException("Email already exists. Use a different email or log in.");
+        }
+
+        String subject = "Email Verification";
+        String body = String.format("""
+            Only one step to take full advantage of LinkedIn.
+            Enter this code to verify your email: %s. The code will expire in %s minutes.""",
+                emailVerificationToken, durationInMinutes);
+        try {
+            emailService.sendEmail(registerRequest.email(), subject, body);
+        } catch (MessagingException e) {
+            throw new EmailSendFailureException("Error sending verification email", e);
+        }
+
+        String authToken = jwtToken.generateToken(registerRequest.email());
+        return new AuthenticationResponseDTO(authToken, "User registered successfully.");
     }
+
 
     public AuthenticationResponseDTO login(AuthenticationRequestDTO loginRequest) {
         User user = userRepository.findByEmail(loginRequest.email())
