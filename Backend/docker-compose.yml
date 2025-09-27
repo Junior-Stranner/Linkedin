@@ -1,9 +1,9 @@
 version: '3.9'
 
 services:
-  backend:
-    build: .
-    container_name: backend
+  linkedin:
+    image: "backend/linkedin:s1"
+    container_name: linkedin-backend
     ports:
       - "8080:8080"
     depends_on:
@@ -17,8 +17,8 @@ services:
       - MAIL_PORT=1025
 
   postgres:
-    image: postgres:15
-    container_name: backend-postgres
+    image: postgres:15.7-alpine
+    container_name: linkedin-postgres
     ports:
       - "5432:5432"
     environment:
@@ -29,11 +29,17 @@ services:
       - postgres-data:/var/lib/postgresql/data
 
   mailhog:
-    image: mailhog/mailhog
-    container_name: backend-mailhog
+    image: mailhog/mailhog:latest
+    container_name: linkedin-mailhog
     ports:
-      - "8025:8025"
-      - "1025:1025"
+      - '1025:1025'
+      - '8025:8025'
 
 volumes:
   postgres-data:
+
+
+## Instale o BFG (Java)
+#java -jar bfg.jar --delete-files .env
+#git reflog expire --expire=now --all && git gc --prune=now --aggressive
+#git push --force
