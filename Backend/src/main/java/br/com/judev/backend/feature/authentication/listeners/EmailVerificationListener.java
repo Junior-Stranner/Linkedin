@@ -51,3 +51,21 @@ Essa classe ouve o evento de verificação de email e, após a confirmação
  que o usuário foi salvo no banco, envia o email de verificação de forma assíncrona e segura,
  tratando erros sem atrapalhar o registro.
  */
+
+
+
+/*Por que fazer assim?
+Evita que uma falha no envio de e-mail bloqueie a criação do usuário.
+
+Garante que o e-mail só será enviado se o registro no banco tiver sido realmente gravado.
+
+Se der erro no envio, você trata no listener, sem impactar a resposta para o usuário.
+
+Facilita manter o envio de e-mail de forma assíncrona e desacoplada da lógica do seu serviço.
+
+Resumo
+Mantenha sua classe EmailService exatamente assim.
+
+Altere seu serviço para publicar eventos ao invés de chamar emailService.sendEmail diretamente.
+
+Tenha o listener para escutar esses eventos e enviar o e-mail.*/

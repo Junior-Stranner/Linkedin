@@ -1,4 +1,4 @@
-package br.com.judev.backend.feature.feed.service;
+/*package br.com.judev.backend.feature.feed.service;
 
 import br.com.judev.backend.exception.UserEmailNotFoundException;
 import br.com.judev.backend.feature.authentication.model.User;
@@ -28,3 +28,4 @@ public class FeedService {
         return postRepository.save(author);
     }
 }
+ */
