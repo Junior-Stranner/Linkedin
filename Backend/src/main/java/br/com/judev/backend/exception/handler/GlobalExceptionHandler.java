@@ -2,7 +2,6 @@ package br.com.judev.backend.exception.handler;
 
 import br.com.judev.backend.dto.ErrorDetails;
 import br.com.judev.backend.exception.*;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,11 +9,21 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MultipartException;
 
 import java.util.Date;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    private ResponseEntity<ErrorDetails> buildErrorResponse(Exception e, WebRequest request, HttpStatus status) {
+        return ResponseEntity.status(status).body(new ErrorDetails(
+                new Date(),
+                e.getMessage(),
+                request.getDescription(false),
+                status.value()
+        ));
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorDetails> handleValidationException(MethodArgumentNotValidException e, WebRequest request) {
@@ -26,44 +35,23 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(new ErrorDetails(
                 new Date(),
                 errorMessage.toString(),
-                request.getDescription(false)
+                request.getDescription(false),
+                HttpStatus.BAD_REQUEST.value()
         ));
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorDetails> handleIllegalArgument(IllegalArgumentException e, WebRequest request) {
-        return ResponseEntity.badRequest().body(new ErrorDetails(
-                new Date(),
-                e.getMessage(),
-                request.getDescription(false)
-        ));
+    @ExceptionHandler({
+            IllegalArgumentException.class,
+            EmailAlreadyExistsException.class,
+            EmailSendFailureException.class
+    })
+    public ResponseEntity<ErrorDetails> handleBadRequest(Exception e, WebRequest request) {
+        return buildErrorResponse(e, request, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(IncorrectPasswordException.class)
     public ResponseEntity<ErrorDetails> handleIncorrectPassword(IncorrectPasswordException e, WebRequest request) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorDetails(
-                new Date(),
-                e.getMessage(),
-                request.getDescription(false)
-        ));
-    }
-
-    @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<ErrorDetails> handleEmailAlreadyExists(EmailAlreadyExistsException e, WebRequest request) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorDetails(
-                new Date(),
-                e.getMessage(),
-                request.getDescription(false)
-        ));
-    }
-
-    @ExceptionHandler(EmailSendFailureException.class)
-    public ResponseEntity<ErrorDetails> handleEmailSendFailure(EmailSendFailureException e, WebRequest request) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorDetails(
-                new Date(),
-                e.getMessage(),
-                request.getDescription(false)
-        ));
+        return buildErrorResponse(e, request, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
@@ -75,34 +63,28 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorDetails(
                 new Date(),
                 message,
-                request.getDescription(false)
+                request.getDescription(false),
+                HttpStatus.BAD_REQUEST.value()
         ));
     }
 
-    @ExceptionHandler(InvalidTokenException.class)
-    public ResponseEntity<ErrorDetails> handleInvalidToken(InvalidTokenException e, WebRequest request) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDetails(
-                new Date(),
-                e.getMessage(),
-                request.getDescription(false)
-        ));
+    @ExceptionHandler({InvalidTokenException.class, UserEmailNotFoundException.class})
+    public ResponseEntity<ErrorDetails> handleNotFound(Exception e, WebRequest request) {
+        return buildErrorResponse(e, request, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(UserEmailNotFoundException.class)
-    public ResponseEntity<ErrorDetails> handleUserEmailNotFound(UserEmailNotFoundException e, WebRequest request) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDetails(
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<ErrorDetails> handleMultipartException(MultipartException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorDetails(
                 new Date(),
-                e.getMessage(),
-                request.getDescription(false)
+                "Erro ao processar o upload. Verifique o formato do corpo ou o arquivo enviado.",
+                request.getDescription(false),
+                HttpStatus.BAD_REQUEST.value()
         ));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorDetails> handleGeneralException(Exception e, WebRequest request) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorDetails(
-                new Date(),
-                e.getMessage(),
-                request.getDescription(false)
-        ));
+        return buildErrorResponse(e, request, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

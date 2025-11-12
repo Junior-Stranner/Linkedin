@@ -5,22 +5,17 @@ import java.util.Date;
 public class ErrorDetails {
     private Date timestamp;
     private String message;
-    private String details;
+    private String path;
+    private int status;
 
-
-    public ErrorDetails(Date timestamp, String message, String details) {
+    public ErrorDetails(Date timestamp, String message, String path, int status) {
         this.timestamp = timestamp;
         this.message = message;
-        this.details = details;
+        this.path = path;
+        this.status = status;
     }
-
 
     public String getMessage() {
         return message;
     }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
 }
