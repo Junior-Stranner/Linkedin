@@ -19,17 +19,19 @@ public class Post {
     @NotEmpty
     private String content;
     private String picture;
+
     @ManyToOne
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
+
     @JsonIgnore
     @ManyToMany
     @JoinTable(
             name = "posts_likes",
             joinColumns = @JoinColumn(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> likes;
+
     @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments;

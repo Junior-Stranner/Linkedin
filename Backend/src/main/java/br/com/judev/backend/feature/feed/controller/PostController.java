@@ -1,9 +1,31 @@
 package br.com.judev.backend.feature.feed.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import br.com.judev.backend.feature.authentication.model.User;
+import br.com.judev.backend.feature.feed.dto.CreatePostRequest;
+import br.com.judev.backend.feature.feed.dto.CreatePostResponse;
+import br.com.judev.backend.feature.feed.model.Post;
+import br.com.judev.backend.feature.feed.service.FeedService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("api/v1/post")
+@RequestMapping("api/v1/feed")
 public class PostController {
+
+    private final FeedService feedService;
+
+    public PostController(FeedService feedService) {
+        this.feedService = feedService;
+    }
+
+    @PostMapping("/posts")
+    public ResponseEntity<CreatePostResponse> createPost(
+            @RequestAttribute("authenticatedUser") User user,
+            @RequestPart(value = "picture", required = false) MultipartFile picture,
+            @RequestPart("post") CreatePostRequest request
+    ) throws Exception {
+        var post = feedService.createPost(picture, request.getContent(), user.getEmail());
+        return ResponseEntity.ok(new CreatePostResponse(post));
+    }
 }
