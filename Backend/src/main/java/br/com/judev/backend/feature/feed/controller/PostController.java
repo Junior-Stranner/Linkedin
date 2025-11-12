@@ -25,7 +25,7 @@ public class PostController {
             @RequestPart(value = "picture", required = false) MultipartFile picture,
             @RequestPart("post") CreatePostRequest request
     ) throws Exception {
-        var post = feedService.createPost(picture, request.getContent(), user.getEmail());
-        return ResponseEntity.ok(new CreatePostResponse(post));
+        CreatePostResponse response = feedService.createPost(picture, request, user.getEmail());
+        return ResponseEntity.ok(response);
     }
 }

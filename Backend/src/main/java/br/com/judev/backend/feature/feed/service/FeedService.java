@@ -3,6 +3,8 @@ package br.com.judev.backend.feature.feed.service;
 import br.com.judev.backend.exception.UserEmailNotFoundException;
 import br.com.judev.backend.feature.authentication.model.User;
 import br.com.judev.backend.feature.authentication.repository.UserRepository;
+import br.com.judev.backend.feature.feed.dto.CreatePostRequest;
+import br.com.judev.backend.feature.feed.dto.CreatePostResponse;
 import br.com.judev.backend.feature.feed.model.Post;
 import br.com.judev.backend.feature.feed.repository.PostRepository;
 import br.com.judev.backend.feature.storage.service.StorageService;
@@ -22,9 +24,9 @@ public class FeedService {
         this.storageService = storageService;
     }
 
-    public Post createPost(MultipartFile picture, String content, String email) throws Exception {
+    public CreatePostResponse createPost(MultipartFile picture, CreatePostRequest request, String email) throws Exception {
         User author = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserEmailNotFoundException("Usuário não encontrado para o email: " + email));
+                .orElseThrow(() -> new UserEmailNotFoundException("User not found by e-mail: " + email));
 
         String pictureUrl = null;
         if (picture != null && !picture.isEmpty()) {
@@ -33,10 +35,12 @@ public class FeedService {
 
         Post post = new Post();
         post.setAuthor(author);
-        post.setContent(content);
+        post.setContent(request.content());
         post.setPicture(pictureUrl);
 
-        return postRepository.save(post);
+        Post savedPost = postRepository.save(post);
+
+        return new CreatePostResponse(savedPost);
     }
 }
 
