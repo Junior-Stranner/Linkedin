@@ -64,20 +64,24 @@ public class AuthenticationController {
         return new Response("Password reset successfully.");
     }
 
-    @PutMapping("/profile/info")
+    @PutMapping("/profile/{id}/info")
     public ResponseEntity<UpdateUserResponse> updateUserProfile(
-            //Significado do @RequestAttribute no final
-            @RequestAttribute("authenticatedUser") User user,
+            @PathVariable Long id,
             @RequestBody UpdateUserRequest request) {
-
-        UpdateUserResponse response = authenticationService.updateUserProfile(user.getId(), request);
+        UpdateUserResponse response = authenticationService.updateUserProfile(id, request);
         return ResponseEntity.ok(response);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
         UserResponse userResponse = authenticationService.getUserById(id);
         return ResponseEntity.ok(userResponse);
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<User> getUser(@RequestAttribute("authenticatedUser") User user) {
+        return ResponseEntity.ok(authenticationService.getUser(user.getEmail()));
     }
 
     @DeleteMapping("/delete")

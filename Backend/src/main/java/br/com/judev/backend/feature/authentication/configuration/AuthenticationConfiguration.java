@@ -10,7 +10,6 @@ import org.springframework.web.client.RestTemplate;
 
 public class AuthenticationConfiguration{
 
-
     /*
     Cria um bean do tipo FilterRegistrationBean que registra um filtro HTTP customizado (AuthenticationFilter).
 

@@ -14,13 +14,6 @@ public class ErrorDetails {
         this.details = details;
     }
 
-    public Date getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
-    }
 
     public String getMessage() {
         return message;
@@ -30,11 +23,4 @@ public class ErrorDetails {
         this.message = message;
     }
 
-    public String getDetails() {
-        return details;
-    }
-
-    public void setDetails(String details) {
-        this.details = details;
-    }
 }

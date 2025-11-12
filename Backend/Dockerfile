@@ -1,10 +1,12 @@
+# Etapa 1: Build usando Maven
 FROM maven:3.9.4-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY . .
 RUN mvn clean package -DskipTests
-FROM eclipse-temurin:21-jre
+
+# Etapa 2: Rodar com JRE leve
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
-
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]

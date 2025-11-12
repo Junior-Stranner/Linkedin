@@ -3,6 +3,7 @@ package br.com.judev.backend.feature.authentication.service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,9 @@ public class EmailService {
 
     private  JavaMailSender mailSender;
 
+    @Value("${spring.mail.username}")
+    private String fromEmail;
+
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
@@ -22,11 +26,11 @@ public class EmailService {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-        helper.setFrom("no-reply@linkedin.com");
+        helper.setFrom(fromEmail);
         helper.setTo(email);
 
         helper.setSubject(subject);
-        helper.setText(content, true);
+        helper.setText(content, true); // 'true' permite HTML no corpo do e-mail
 
         mailSender.send(message);
 

@@ -35,3 +35,5 @@ build/
 .idea/
 docker-compose.yml/
 .mvn/
+
+.env
