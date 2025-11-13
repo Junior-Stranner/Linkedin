@@ -1,18 +1,23 @@
 package br.com.judev.backend.feature.feed.service;
 
 import br.com.judev.backend.exception.UserEmailNotFoundException;
+import br.com.judev.backend.feature.authentication.dto.UserResponse;
 import br.com.judev.backend.feature.authentication.model.User;
 import br.com.judev.backend.feature.authentication.repository.UserRepository;
 import br.com.judev.backend.feature.feed.dto.PostDto;
 import br.com.judev.backend.feature.feed.model.Post;
 import br.com.judev.backend.feature.feed.repository.PostRepository;
 import br.com.judev.backend.feature.storage.service.StorageService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class FeedService {
@@ -82,6 +87,29 @@ public class FeedService {
         post.setUpdatedDate(LocalDateTime.now());
         Post updatedPost = postRepository.save(post);
         return new PostDto(updatedPost);
+    }
+
+    public PostDto getPost(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("Post not found"));
+        return new PostDto(post);
+    }
+
+    public List<PostDto> getAllPosts() {
+        return postRepository.findAllByOrderByCreationDateDesc()
+                .stream()
+                .map(PostDto::new)
+                .toList();
+    }
+
+    public Set<UserResponse> getPostLikes(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+        return post.getLikes()
+                .stream()
+                .map(UserResponse::new)
+                .collect(Collectors.toSet());
     }
 
 }
