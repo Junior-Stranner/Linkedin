@@ -51,4 +51,22 @@ public class PostController {
         PostDto PostDto = feedService.getPost(postId);
         return ResponseEntity.ok(PostDto);
     }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<?> deletePost(
+            @PathVariable Long postId,
+            @RequestAttribute("authenticatedUser") User user
+    ) throws Exception {
+        feedService.deletePost(postId, user.getId());
+        return ResponseEntity.ok("Post deleted successfully.");
+    }
+
+    @PutMapping("/{postId}/like")
+    public ResponseEntity<PostDto> likePost(
+            @PathVariable Long postId,
+            @RequestAttribute("authenticatedUser") User user
+    ) throws Exception {
+        PostDto updatedPost = feedService.likePost(postId, user.getId());
+        return ResponseEntity.ok(updatedPost);
+    }
 }

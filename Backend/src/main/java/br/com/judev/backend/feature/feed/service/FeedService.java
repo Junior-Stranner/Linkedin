@@ -112,5 +112,35 @@ public class FeedService {
                 .collect(Collectors.toSet());
     }
 
+    public void deletePost(Long postId, Long userId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (!post.getAuthor().equals(user)) {
+            throw new IllegalArgumentException("User is not the author of the post");
+        }
+
+        postRepository.delete(post);
+    }
+
+
+    public PostDto likePost(Long postId, Long userId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (post.getLikes().contains(user)) {
+            post.getLikes().remove(user);
+        } else {
+            post.getLikes().add(user);
+        }
+
+        Post savedPost = postRepository.save(post);
+        return new PostDto(savedPost);
+    }
 }
 
