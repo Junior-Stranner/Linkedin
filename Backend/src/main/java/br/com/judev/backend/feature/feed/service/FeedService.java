@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 
 @Service
@@ -51,6 +52,37 @@ public class FeedService {
     }
 
 
+    @Transactional
+    public PostDto editPost(Long postId, Long userId, MultipartFile picture, PostDto request) throws Exception {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        //Garante que o post pertence ao usuário autenticado
+        if (!post.getAuthor().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("User is not the author of the post");
+        }
+
+        //Atualiza o conteúdo se vier no request
+        if (request.content() != null && !request.content().isBlank()) {
+            post.setContent(request.content());
+        }
+
+        String pictureUrl = post.getPicture(); // mantém a atual por padrão
+
+        if (picture != null && !picture.isEmpty()) {
+            pictureUrl = storageService.saveImage(picture);
+        } else if (request.picture() != null && !request.picture().isBlank()) {
+            pictureUrl = request.picture();
+        }
+
+        post.setPicture(pictureUrl);
+        post.setUpdatedDate(LocalDateTime.now());
+        Post updatedPost = postRepository.save(post);
+        return new PostDto(updatedPost);
+    }
 
 }
 
