@@ -33,6 +33,4 @@ public record UserResponse(
                 user.getAbout()
         );
     }
-
-
 }

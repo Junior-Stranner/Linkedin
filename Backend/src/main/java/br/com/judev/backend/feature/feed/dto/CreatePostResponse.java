@@ -1,4 +1,4 @@
-package br.com.judev.backend.feature.feed.dto;
+/*package br.com.judev.backend.feature.feed.dto;
 
 import br.com.judev.backend.feature.feed.model.Post;
 
@@ -20,4 +20,4 @@ public record CreatePostResponse( Long id,
                 post.getCreationDate()
         );
     }
-}
+}*/
