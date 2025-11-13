@@ -7,7 +7,10 @@ import br.com.judev.backend.feature.authentication.repository.UserRepository;
 import br.com.judev.backend.feature.authentication.utils.Encoder;
 import br.com.judev.backend.feature.authentication.utils.JwtToken;
 import jakarta.mail.MessagingException;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -21,10 +24,17 @@ public class AuthenticationService {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
     private final UserRepository userRepository;
-    private final int durationInMinutes = 1;
+    private final int durationInMinutes = 3;
     private final Encoder encoder;
     private final JwtToken jwtToken;
     private final EmailService emailService;
+
+
+    @PersistenceContext//A anotação @PersistenceContext diz ao Spring (ou JPA) para injetar automaticamente
+    // uma instância gerenciada do EntityManager configurado para o seu contexto de persistência.
+    private EntityManager entityManager;
+    /*O EntityManager é o núcleo do JPA (Java Persistence API)
+    ele é o objeto que gerencia o ciclo de vida das entidades (inserir, atualizar, buscar, deletar, etc.).*/
 
     public AuthenticationService(UserRepository userRepository, Encoder encoder, JwtToken jwtToken, EmailService emailService) {
         this.userRepository = userRepository;
@@ -204,9 +214,29 @@ public class AuthenticationService {
         return new UserResponse(user);
     }
 
+
+    /**
+     * Esse método realiza a exclusão manual de um usuário.
+     * Ao invés de delegar ao Spring Data JPA, usamos o EntityManager
+     * para controlar explicitamente as operações no banco.
+     *
+     * A anotação @Transactional garante que todas as operações sejam
+     * executadas dentro da mesma transação — se algo falhar, tudo é revertido.
+     */
+   /* @Transactional
+    public void deleteUser(Long userId) {
+        User user = entityManager.find(User.class, userId);
+        if (user != null) {
+            entityManager.createNativeQuery("DELETE FROM posts_likes WHERE user_id = :userId")
+                    .setParameter("userId", userId)
+                    .executeUpdate();
+            entityManager.remove(user);
+        }
+    }*/
     public void deleteUser(String email) {
         User deleteUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserEmailNotFoundException("User not found, and cannot exclude!"));
         userRepository.delete(deleteUser);
     }
+
 }

@@ -1,11 +1,13 @@
 package br.com.judev.backend.feature.authentication.model;
 
+import br.com.judev.backend.feature.feed.model.Post;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
@@ -55,6 +57,10 @@ public class User {
     private String coverPicture = null;
     private Boolean profileComplete = false;
     private String about = null;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Post> posts;
 
     public User(String email, String password) {
         this.email = email;
@@ -209,5 +215,13 @@ public class User {
 
     public void setAbout(String about) {
         this.about = about;
+    }
+
+    public List<Post> getPosts() {
+        return posts;
+    }
+
+    public void setPosts(List<Post> posts) {
+        this.posts = posts;
     }
 }

@@ -31,6 +31,8 @@ public class FeedService {
         String pictureUrl = null;
         if (picture != null && !picture.isEmpty()) {
             pictureUrl = storageService.saveImage(picture);
+        } else {
+            pictureUrl = request.picture(); // <-- usa o link vindo do JSON
         }
 
         Post post = new Post();
@@ -39,9 +41,9 @@ public class FeedService {
         post.setPicture(pictureUrl);
 
         Post savedPost = postRepository.save(post);
-
         return new CreatePostResponse(savedPost);
     }
+
 
 }
 

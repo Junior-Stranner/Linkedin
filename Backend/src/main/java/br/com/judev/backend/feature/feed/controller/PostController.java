@@ -19,13 +19,12 @@ public class PostController {
         this.feedService = feedService;
     }
 
-    @PostMapping(value = "/posts", consumes = {"multipart/form-data"})
+    @PostMapping("/posts")
     public ResponseEntity<CreatePostResponse> createPost(
             @RequestAttribute("authenticatedUser") User user,
-            @RequestPart(value = "picture", required = false) MultipartFile picture,
-            @RequestPart("post") CreatePostRequest request
+            @RequestBody CreatePostRequest request
     ) throws Exception {
-        CreatePostResponse postResponse = feedService.createPost(picture, request, user.getEmail());
+        var postResponse = feedService.createPost(null, request, user.getEmail());
         return ResponseEntity.ok(postResponse);
     }
 
