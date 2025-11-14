@@ -4,8 +4,11 @@ import br.com.judev.backend.exception.UserEmailNotFoundException;
 import br.com.judev.backend.feature.authentication.dto.UserResponse;
 import br.com.judev.backend.feature.authentication.model.User;
 import br.com.judev.backend.feature.authentication.repository.UserRepository;
+import br.com.judev.backend.feature.feed.dto.CommentDto;
 import br.com.judev.backend.feature.feed.dto.PostDto;
+import br.com.judev.backend.feature.feed.model.Comment;
 import br.com.judev.backend.feature.feed.model.Post;
+import br.com.judev.backend.feature.feed.repository.CommentRepository;
 import br.com.judev.backend.feature.feed.repository.PostRepository;
 import br.com.judev.backend.feature.storage.service.StorageService;
 import jakarta.persistence.EntityNotFoundException;
@@ -25,11 +28,13 @@ public class FeedService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final StorageService storageService;
+    private final CommentRepository commentRepository;
 
-    public FeedService(PostRepository postRepository, UserRepository userRepository, StorageService storageService) {
+    public FeedService(PostRepository postRepository, UserRepository userRepository, StorageService storageService, CommentRepository commentRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.storageService = storageService;
+        this.commentRepository = commentRepository;
     }
 
     @Transactional
@@ -141,6 +146,50 @@ public class FeedService {
 
         Post savedPost = postRepository.save(post);
         return new PostDto(savedPost);
+    }
+
+
+    public CommentDto addComment(Long postId, Long userId, String content) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        Comment comment = commentRepository.save(new Comment(post, user, content));
+
+        return new CommentDto(comment.getContent());
+    }
+
+
+    public CommentDto editComment(Long commentId, Long userId, String newContent) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (!comment.getAuthor().equals(user)) {
+            throw new IllegalArgumentException("User is not the author of the comment");
+        }
+
+        comment.setContent(newContent);
+        Comment updated = commentRepository.save(comment);
+
+        return new CommentDto(updated.getContent());
+    }
+
+
+
+    public void deleteComment(Long commentId, Long userId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        if (!comment.getAuthor().equals(user)) {
+            throw new IllegalArgumentException("User is not the author of the comment");
+        }
+        commentRepository.delete(comment);
     }
 }
 
